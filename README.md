@@ -1,2 +1,2 @@
 # JavaPractice
-day to day programing questions
+day to day programing practice
