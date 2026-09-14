@@ -4,6 +4,7 @@ IOC
 DI
 
 
-1) management.endpoint.shutdown.enabled=true
-
+1) management.endpoint.web.exposure.enabled=*
+2) management.endpoint.
+3)
 
