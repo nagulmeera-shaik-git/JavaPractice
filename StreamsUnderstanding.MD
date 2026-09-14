@@ -12,6 +12,7 @@ intermediate operators
 
 
 Terinary operators
+------------------
 1)foreach
 2)Collect
 3)reduce
