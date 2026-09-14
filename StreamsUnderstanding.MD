@@ -1,7 +1,7 @@
 Majorly based on lambda streams possible 
 
 operators  intermediate & Terinaery operators   flow is 
-intermediate operators are lazy operators
+intermediate operators (are lazy operators)
 ======================
 1)filter
 2)map
