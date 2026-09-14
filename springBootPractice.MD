@@ -1,7 +1,7 @@
 Spring Boot
 ---------------------
-IOC
-DI
+IOC:
+DI:
 
 
 1) management.endpoints.web.exposure.enabled=*
