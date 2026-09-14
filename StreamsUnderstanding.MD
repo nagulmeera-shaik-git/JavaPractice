@@ -2,6 +2,7 @@ Majorly based on lambda streams possible
 
 operators  intermediate & Terinaery operators   flow is 
 intermediate operators
+======================
 1)filter
 2)map
 3)flatmap
