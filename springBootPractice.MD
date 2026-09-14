@@ -4,4 +4,6 @@ IOC
 DI
 
 
+management.endpoint.shutdown.enabled=true
+
 
