@@ -14,7 +14,7 @@ intermediate operators
 Terinary operators
 1)foreach
 2)Collect
-3)
-4)
-5)
-6)
+3)reduce
+4)toList
+5)toMap
+6)toSet
