@@ -29,4 +29,9 @@ Based on those, Spring Boot automatically provides appropriate configuration and
 
 Spring Boot auto-configuration automatically configures the application based on the dependencies available on the classpath, existing beans, application properties, and conditional configuration. It reduces the amount of manual configuration required. For example, adding a web starter allows Spring Boot to automatically configure much of the web application infrastructure.
 
+-----------------------------------------------------------
+GET /orders/101
 
+Can you explain the high-level flow of what happens inside Spring Boot from the HTTP request reaching the application until getOrder(101) is executed?
+
+The HTTP request first reaches the embedded web server and then Spring MVC's DispatcherServlet. The DispatcherServlet uses the request URL and HTTP method to find the appropriate controller handler method. For GET /orders/101, it matches /orders and /{id}, extracts the path variable as 101, and invokes the controller method. The controller then calls the service layer, which typically interacts with the repository or database, and the result is converted into the HTTP response.
