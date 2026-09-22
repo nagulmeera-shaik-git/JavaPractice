@@ -98,3 +98,31 @@ After a wait period, it moves to half-open and allows limited test requests. If 
 
 It protects your service from continuously depending on an unhealthy downstream service.
 **Retry handles temporary failures; Circuit Breaker handles repeated failures.**
+-------------------------------------------------------------------
+**Bulkhead Pattern**
+Bulkhead = isolate resources so one failing dependency doesn't take down everything.
+
+The resources can be isolated using things such as:
+Separate thread pools
+Connection pools
+Concurrency limits
+Semaphores
+
+Now connect the four resilience patterns
+
+
+**TIMEOUT
+   ↓
+"Don't wait forever"
+
+RETRY
+   ↓
+"Try temporary failures again"
+
+CIRCUIT BREAKER
+   ↓
+"Stop calling a repeatedly failing service"
+
+BULKHEAD
+   ↓
+"Don't let one dependency consume everything"**
