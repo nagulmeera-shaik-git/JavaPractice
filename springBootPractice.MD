@@ -126,3 +126,76 @@ CIRCUIT BREAKER
 BULKHEAD
    ↓
 "Don't let one dependency consume everything"**
+
+
+                 Downstream Service
+                        ↓
+                    TIMEOUT
+                        ↓
+              Temporary failure?
+                   ↙          ↘
+                 YES           NO
+                  ↓             ↓
+               RETRY       Handle failure
+                  ↓
+             Still failing?
+                  ↓
+          CIRCUIT BREAKER
+                  ↓
+             OPEN 🔴
+                  ↓
+             FAIL FAST
+                  ↓
+             FALLBACK
+---------------------------------------------------------------------
+**How do you prevent duplicate payments during retries?**
+I would use an idempotency key for the payment request. The payment service stores the key along with the processing result. If the client retries with the same key, the service recognizes that the operation was already processed and returns the existing result instead of processing the payment again. This is especially important because a timeout doesn't necessarily mean the original operation failed.             
+---------------------------------------------------------------------
+**Spring Boot Microservices**
+You have:
+
+Order Service
+     |
+     ↓
+Payment Service
+     |
+     ↓
+Inventory Service
+
+If Order Service directly accesses Payment Service's database, what is the main architectural problem?
+Each microservice should own its data and database. If another service directly accesses that database, it creates tight coupling at the database and schema level. Changes in the database can impact multiple services and reduce independent deployment, scalability, and maintainability. Other services should communicate through well-defined APIs or events.
+-------------------------------------------------------------------------
+You have 10 instances of Payment Service running:
+
+Payment-1
+Payment-2
+Payment-3
+...
+Payment-10
+
+Order Service needs to call Payment Service.
+How does Order Service know which Payment Service instance to call?
+In a microservices environment,** we typically use service discovery and load balancing so that the caller doesn't need to know the IP address of a particular instanc**e. Service discovery provides the available instances, and the load balancer routes requests to a suitable healthy instance
+--------------------------------------------------------------------------
+**API Gateway**
+An API Gateway acts as the entry point for external clients in a microservices architecture. It routes requests to appropriate services and can also handle cross-cutting concerns such as 
+authentication, authorization, rate limiting, logging, and sometimes load balancing. 
+It also prevents clients from becoming tightly coupled to the internal service topology.
+
+--------------------------------------------------------------------------
+Order Service calls Payment Service:
+
+Order Service → Payment Service
+                     ↓
+                 Payment SUCCESS
+                     ↓
+              response is lost
+                     ↓
+Order Service gets TIMEOUT ❌
+
+Order Service thinks:
+
+"Payment failed, let's try again."
+
+What problem can happen? payment happens twice
+A timeout doesn't guarantee that the downstream operation failed. The payment may have succeeded but the response may have been lost. If the caller retries without protection, it can result in duplicate payment. **We should use an idempotency key so that repeated requests for the same operation return the existing result instead of executing the operation again.**
