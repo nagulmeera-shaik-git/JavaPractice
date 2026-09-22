@@ -89,3 +89,12 @@ Each service maintains its own local transaction and database. For business work
 For reliable event publishing, I would consider the Outbox Pattern. 
 2PhaseCommit is another option, but it introduces coordination and availability/performance overhead, 
 so Saga is often more suitable for microservices.
+-----------------------------------------------------------------
+**Circuit Breaker**
+What is a Circuit Breaker?
+A circuit breaker is a resilience pattern used to prevent repeated calls to a failing or slow downstream service. 
+When failures cross a configured threshold, the circuit opens and subsequent calls fail fast instead of continuously hitting the unhealthy service. 
+After a wait period, it moves to half-open and allows limited test requests. If the dependency recovers, the circuit closes; otherwise, it opens again.
+
+It protects your service from continuously depending on an unhealthy downstream service.
+**Retry handles temporary failures; Circuit Breaker handles repeated failures.**
