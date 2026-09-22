@@ -199,3 +199,38 @@ Order Service thinks:
 
 What problem can happen? payment happens twice
 A timeout doesn't guarantee that the downstream operation failed. The payment may have succeeded but the response may have been lost. If the caller retries without protection, it can result in duplicate payment. **We should use an idempotency key so that repeated requests for the same operation return the existing result instead of executing the operation again.**
+---------------------------------------------------------------------------------
+here's a potential problem here:
+
+Order DB transaction
+       +
+Publish event
+
+What if Order Service saves the order successfully but crashes before publishing OrderCreated?
+
+Order saved ✅
+       ↓
+Application crashes 💥
+       ↓
+Event NOT published ❌
+
+Now Payment Service never knows about the order.
+
+This is where the Outbox Pattern becomes useful.
+The Outbox Pattern solves the dual-write problem between a database and a message broker. We store the business change and an event record in an Outbox table within the same local database transaction. A separate publisher then reads the Outbox and publishes the event to the broker, with retries if publishing fails.
+
+----------------------------------------------------------------------------------------
+Spring has had different HTTP client approaches:
+
+RestTemplate → traditional, synchronous/blocking
+WebClient    → modern, supports non-blocking/reactive
+
+WebClient is Spring's modern HTTP client and is designed to support non-blocking, reactive communication. It can also be used in traditional applications, but if we call block(), we lose the non-blocking benefit.
+---------------------------------------------------------
+
+Suppose Order Service calls Payment Service using WebClient.
+
+Payment Service takes 30 seconds to respond.
+
+What should we configure so Order Service doesn't wait indefinitely?
+For downstream REST calls, I would configure connection and response/read timeouts so that the caller doesn't wait indefinitely. The timeout should be based on the business SLA and downstream behavior. For further resilience, I would combine it with circuit breaking, limited retries where appropriate, and proper fallback handling
