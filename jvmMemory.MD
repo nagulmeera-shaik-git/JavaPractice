@@ -148,7 +148,37 @@ I'd first determine whether we're seeing high allocation or object retention. I'
 Allocation → GC → Reclamation → Retention
 
 
+What is G1 GC?
+G1, or Garbage-First Garbage Collector, divides the heap into regions rather than treating Young and Old generations as large contiguous spaces. 
+It identifies regions with a high amount of reclaimable garbage and prioritizes them for collection. 
+It performs young and mixed collections and uses concurrent phases to help manage large heaps while targeting predictable pause times.
 
+
+
+"How would you troubleshoot a Java memory leak?
+First I'd confirm whether the heap is actually growing over time and whether the post-GC heap baseline keeps increasing. I'd analyze GC logs and JVM metrics to distinguish high allocation from object retention. If retention is suspected, I'd capture a heap dump and analyze the largest retained objects and their GC-root paths. Then I'd identify the application-level reference causing the objects to remain reachable—for example an unbounded cache, static collection, ThreadLocal, listener, or similar long-lived reference.
+
+memory-leak formula
+OBJECT
+   ↓
+STILL REFERENCED
+   ↓
+GC CANNOT COLLECT
+   ↓
+MEMORY RETAINED
+   ↓
+OLD GEN GROWS
+   ↓
+GC PRESSURE
+   ↓
+SLOW APPLICATION
+   ↓
+POSSIBLE OOM
+
+Who is keeping this object alive?"
+
+When debugging a memory leak, that question will lead you toward the answer.
+Next we'll learn Heap Dump analysis in a practical example—I'll show you how you'd go from "memory is 90%" → heap dump → HashMap → GC Root → actual leak, step by step.
 
 
 Scenario: Your Spring Boot application suddenly gets:

@@ -234,3 +234,4 @@ Payment Service takes 30 seconds to respond.
 
 What should we configure so Order Service doesn't wait indefinitely?
 For downstream REST calls, I would configure connection and response/read timeouts so that the caller doesn't wait indefinitely. The timeout should be based on the business SLA and downstream behavior. For further resilience, I would combine it with circuit breaking, limited retries where appropriate, and proper fallback handling
+
