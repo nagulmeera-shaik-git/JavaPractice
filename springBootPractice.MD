@@ -16,6 +16,42 @@ I prefer constructor injection because it makes the class's dependencies explici
 What is the difference between @Component, @Service, and @Repository?
 @Component, @Service, and @Repository are stereotype annotations that allow Spring to discover and manage classes as beans through component scanning. @Component is generic, @Service is intended for the business/service layer, and @Repository is intended for the persistence layer and also enables Spring's data-access exception translation.
 ------------------------------------------------
+What is a Spring Bean?
+A Spring Bean is an object whose creation, configuration, dependency injection, and lifecycle are managed by the Spring IoC container. A normal object created using new is managed directly by the application code and is outside Spring's bean lifecycle unless it is registered with the container.
+
+Spring's default bean scope is singleton, so normally one instance of the bean is created per ApplicationContext and shared wherever it is injected. Spring also supports other scopes such as prototype, request, and session depending on the application's requirement.
+If OrderService is a singleton and 100 requests are using the same instance concurrently, is that a problem?
+Think about whether the class has instance variables/state.
+One object is shared by many threads.
+
+@Service
+public class OrderService {
+
+    private int count = 0;
+}
+has one count variable shared by all requests using that OrderService instance.
+If 100 requests come at the same time, multiple threads may access that same object.
+That can cause problems if the bean contains mutable shared state.
+public void processOrder() {
+    count++;
+}
+
+Multiple threads doing count++ can cause a race condition.
+
+
+Singleton beans are shared, so they should generally be stateless and thread-safe.
+Avoid mutable request-specific data like:
+private String currentUser;
+private int count;
+private Order currentOrder;
+
+**A singleton Spring bean is shared across multiple threads, so we need to be careful with mutable instance state. Stateless singleton services are generally safe because method-local variables are thread-specific. If a singleton maintains shared mutable state, we need proper synchronization or thread-safe mechanisms to avoid race conditions**
+----------------------------
+@PostConstruct is called by Spring after the bean has been instantiated and its dependencies have been injected, but before the bean is made available for normal use. It's commonly used for initialization logic.
+Create → Inject → PostConstruct → Ready
+----------------------------
+@PreDestroy is invoked by the Spring container before a managed bean is destroyed. It is typically used for cleanup activities such as releasing resources or stopping background processes.
+-----------------------------
 What is Auto-Configuration?
 
 Spring Boot looks at:
