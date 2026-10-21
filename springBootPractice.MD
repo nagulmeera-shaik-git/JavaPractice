@@ -78,6 +78,13 @@ while PATCH is used for partial updates.
 PUT is intended to be idempotent, 
 whereas PATCH may or may not be idempotent depending on the operation."
 ---------------------------------------------------------------
+You have:
+POST /orders
+
+The request is valid, but an order with the same order ID already exists, and creating it again would violate a unique constraint.
+
+I would return 409 Conflict when a valid request cannot be completed because it conflicts with the current state of the resource, such as creating a duplicate order where the order ID has a unique constraint
+-------------------------------------------------------------------
 @Transactional
 public void placeOrder() {
     saveOrder();
@@ -125,6 +132,54 @@ Each service maintains its own local transaction and database. For business work
 For reliable event publishing, I would consider the Outbox Pattern. 
 2PhaseCommit is another option, but it introduces coordination and availability/performance overhead, 
 so Saga is often more suitable for microservices.
+------------------------------------------------------------------
+Order DB
+   ↓
+Save Order ✅
+
+Then publish event ❌
+   ↓
+Application crashes 💥
+
+Outbox solves this
+Instead of doing:
+Save Order
+Publish Event
+
+we do both DB operations in one local transaction:
+┌──────────── Order DB ────────────┐
+│                                  │
+│  Orders table                    │
+│  Order 101                       │
+│                                  │
+│  Outbox table                    │
+│  OrderCreated event              │
+│                                  │
+└──────────────────────────────────┘
+             ↑
+       ONE transaction
+If the transaction succeeds:
+Order saved ✅
+Event stored in Outbox ✅
+
+Then a separate publisher reads the Outbox:
+Outbox
+   ↓
+Publisher
+   ↓
+Message Broker
+   ↓
+Payment Service
+
+If publishing temporarily fails, the event remains in the Outbox and can be retried.
+🧠 Remember this forever
+“Business data + event record = one local transaction; publish the event afterward.
+
+What is the main purpose of the Outbox Pattern?
+The Outbox Pattern solves the dual-write problem between a database and a message broker. We store the business change and an event record in an Outbox table within the same local database transaction. A separate publisher then reads the Outbox and publishes the event to the broker, with retries if publishing fails.
+------------------------------------------------------------------
+Saga can be implemented in two common ways.
+In Saga orchestration, a central orchestrator coordinates the workflow and invokes each participating service, including compensating actions when required. In choreography, there is no central coordinator; services communicate through events and react to events published by other services.
 -----------------------------------------------------------------
 **Circuit Breaker**
 What is a Circuit Breaker?
@@ -270,4 +325,31 @@ Payment Service takes 30 seconds to respond.
 
 What should we configure so Order Service doesn't wait indefinitely?
 For downstream REST calls, I would configure connection and response/read timeouts so that the caller doesn't wait indefinitely. The timeout should be based on the business SLA and downstream behavior. For further resilience, I would combine it with circuit breaking, limited retries where appropriate, and proper fallback handling
+-------------------------------------------------------------
+Client
+  |
+  | Trace-ID: ABC123
+  ↓
+API Gateway
+  |
+  | ABC123
+  ↓
+Order Service
+  |
+  | ABC123
+  ↓
+Payment Service
+  |
+  | ABC123
+  ↓
+Inventory Service
 
+Trace ID → identifies the entire request journey
+
+Span ID → identifies one operation within that journey
+--------------------------------------------------------------
+Rate limiting controls how many requests a client can make within a defined time or quota. It protects downstream services from excessive traffic, helps prevent abuse, and provides predictable resource usage. When the limit is exceeded, the gateway can return HTTP 429.
+
+--------------------------------------------------------
+Don't put secrets such as database passwords casually into a config repository. In production, secrets are generally handled through a secret-management solution such as AWS Secrets Manager, Parameter Store, Vault, Kubernetes Secrets, etc., depending on the environment
+-----------------------------------------------------
