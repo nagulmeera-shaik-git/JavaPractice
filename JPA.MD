@@ -36,6 +36,7 @@ List<Order> findAll();
 Hibernate can fetch related entities in batches rather than one at a time.
 
 Solve it based on the actual access pattern — JOIN FETCH, EntityGraph, batching, or an appropriate query.
+
 -------------------------------------------------------------------
 ACID connection
 For interviews, remember:
@@ -51,6 +52,7 @@ Concurrent transactions shouldn't improperly interfere with each other.
 
 D — Durability
 Once committed, data survives failures according to the database's durability guarantees.
+
 -----------------------------------------------------------------
 With Spring's default transaction behavior, RuntimeException and Error generally trigger rollback.
 
