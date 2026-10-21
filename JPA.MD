@@ -60,7 +60,11 @@ But checked exceptions do not automatically trigger rollback by default.
 
 Propagation	Meaning
 REQUIRED	Join existing or create new
+
 REQUIRES_NEW	Always create a new transaction
+
 SUPPORTS	Use existing if available
+
 MANDATORY	Must already have a transaction
+
 NOT_SUPPORTED	Execute without transaction
