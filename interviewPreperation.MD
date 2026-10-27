@@ -67,6 +67,7 @@ These perform the update atomically for the key.
 
 ConcurrentHashMap is thread-safe at the individual operation level, but get() followed by put() is not an atomic compound operation. Multiple threads can read the same value and overwrite each other's updates. So the final value is not guaranteed to be 10. I would use compute() or merge() for an atomic map update, or use AtomicInteger if the requirement is simply maintaining a counter."
 -----------------------------------------------
+
 What is the difference between synchronized, volatile, and AtomicInteger?
 **synchronized** provides mutual exclusion and visibility. It ensures that only one thread can execute the synchronized critical section at a time for the same monitor, and changes are visible to other threads acquiring that monitor.
 **volatile** is mainly used for visibility. When one thread updates a volatile variable, other threads can see the latest value, but volatile doesn't provide atomicity for compound operations such as count++.
@@ -74,6 +75,7 @@ What is the difference between synchronized, volatile, and AtomicInteger?
 I would use volatile for simple state flags, 
 synchronized when I need to protect a critical section involving multiple operations, and 
 AtomicInteger for atomic counters or similar operations.
+
 --------------------------------------------------------------------
 Imagine your Spring Boot application has 200 request threads, and each request calls a slow external service.
 The external service sometimes takes 30 seconds to respond.
