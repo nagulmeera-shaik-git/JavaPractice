@@ -9,14 +9,40 @@ DI:
 2) management.endpoints.web.exposre.exclude=beans
 3) management.endpoints.shutdown.enabled=true
 4)
+
+spring bean life cycle
+
+Component Scan
+      ↓
+Bean Definition
+      ↓
+Bean Instantiation
+      ↓
+Dependency Injection
+      ↓
+BeanPostProcessor
+      ↓
+@PostConstruct
+      ↓
+Bean Ready
+      ↓
+Application Running
+      ↓
+@PreDestroy
+
 -----------------------------------------------
 Why do you prefer constructor injection?
 I prefer constructor injection because it makes the class's dependencies explicit and ensures mandatory dependencies are available when the object is created. It also allows dependencies to be declared as final, improves immutability, and makes unit testing easier because I can instantiate the class directly without relying on the Spring container
 -----------------------------------------------
+
 What is the difference between @Component, @Service, and @Repository?
 @Component, @Service, and @Repository are stereotype annotations that allow Spring to discover and manage classes as beans through component scanning. @Component is generic, @Service is intended for the business/service layer, and @Repository is intended for the persistence layer and also enables Spring's data-access exception translation.
 ------------------------------------------------
+
 What is a Spring Bean?
+
+A Spring Bean is an object whose complete lifecycle is managed by the Spring IoC container. Spring is responsible for creating the object, resolving and injecting its dependencies, applying BeanPostProcessors such as transaction and AOP proxies, executing lifecycle callbacks like @PostConstruct and @PreDestroy, and making the bean available through the ApplicationContext for the rest of the application.
+
 A Spring Bean is an object whose creation, configuration, dependency injection, and lifecycle are managed by the Spring IoC container. A normal object created using new is managed directly by the application code and is outside Spring's bean lifecycle unless it is registered with the container.
 
 Spring's default bean scope is singleton, so normally one instance of the bean is created per ApplicationContext and shared wherever it is injected. Spring also supports other scopes such as prototype, request, and session depending on the application's requirement.
@@ -64,8 +90,15 @@ Certain conditions
 Based on those, Spring Boot automatically provides appropriate configuration and beans.
 
 Spring Boot auto-configuration automatically configures the application based on the dependencies available on the classpath, existing beans, application properties, and conditional configuration. It reduces the amount of manual configuration required. For example, adding a web starter allows Spring Boot to automatically configure much of the web application infrastructure.
+----------------------------------------------------------------
 
------------------------------------------------------------
+In one enterprise application, we had a PDF generation module using Apache PDFBox along with several custom fonts and templates. Initializing that module required loading dozens of font files into memory, which increased application startup time by several seconds. Since PDF generation was used only by administrators, we annotated that service with @Lazy. The application started faster, and the PDF module was initialized only when the first administrator requested a report.
+
+-----------------------------------------------------------------
+
+I use @Lazy selectively for expensive or rarely used components, such as reporting modules, legacy integrations, or large initialization tasks that don't need to be available immediately after startup. I avoid using it for core business services or security infrastructure because eager initialization helps detect configuration problems early and ensures the application is fully ready before it starts serving requests
+
+-----------------------------------------------------------------
 GET /orders/101
 
 Can you explain the high-level flow of what happens inside Spring Boot from the HTTP request reaching the application until getOrder(101) is executed?

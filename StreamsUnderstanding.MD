@@ -28,7 +28,7 @@ intermediate operators (are lazy operators)
 3)flatmap
 4)findFirst
 5)findany
-6)finadall
+6)findall
 
 
 Terinary operators
