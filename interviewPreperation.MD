@@ -1,4 +1,5 @@
 How does HashMap work internally? What changed in Java 8? 
+
 HashMap stores key-value pairs using an array of buckets. When we call put(key, value), HashMap calculates the hash of the key using hashCode() and applies a hash-spreading operation. That hash is used to determine the bucket index.
 If the bucket is empty, a new entry is inserted. If there is already an entry in the bucket, it means there is a collision, so HashMap compares the keys using hash information and equals(). If the keys are equal, the existing value is replaced. Otherwise, the new entry is added to that bucket.
 In Java 8 and later, when a bucket becomes sufficiently large, HashMap can convert the linked-list structure into a red-black tree to improve lookup performance.
