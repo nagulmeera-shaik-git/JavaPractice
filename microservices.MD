@@ -23,3 +23,7 @@ Outbox helps make database change + event publishing reliable.
 Persist workflow state; don't depend only on memory.
 
 Compensation can also fail, so retry and reconciliation are required.
+
+---------------------------------------------------------------------------------------
+1. Why do we need the Outbox Pattern?
+
