@@ -34,7 +34,7 @@ Publish an OrderCreated event to Kafka.
 The simple code may look like this:
 
 JAVA
-Copy
+
 public void createOrder(Order order) {
     orderRepository.save(order);
     kafkaTemplate.send("order-created", order.getId());
