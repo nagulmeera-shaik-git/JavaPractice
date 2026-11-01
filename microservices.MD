@@ -53,3 +53,8 @@ Now the order is present in the database, but Payment/Inventory service never re
 This is where the Outbox Pattern helps.
 
 Outbox Pattern is a way to reliably publish an event after a database transaction by first saving the event in an Outbox table in the same database transaction as the business data.
+
+---------------------------------------------------------------------------------------
+
+What is Outbox Pattern and why do we need it?
+Outbox is used when we need to update a database and publish an event reliably. If I directly save the order and then publish to Kafka, there is a failure window where the database commit can succeed but Kafka publishing can fail, so other services may never know about the order. With Outbox, I save the order and the event record in an Outbox table in the same local database transaction. A separate publisher reads the Outbox records and publishes them to Kafka. This gives us reliable eventual event publishing. It doesn't mean exactly-once delivery, so consumers should still handle duplicate events using idempotency.
