@@ -25,8 +25,8 @@ Persist workflow state; don't depend only on memory.
 Compensation can also fail, so retry and reconciliation are required.
 
 ---------------------------------------------------------------------------------------
-1. Why do we need the Outbox Pattern?
 
+1. Why do we need the Outbox Pattern?
 Suppose Order Service has to do two things:
 
 Save the order in the database.
@@ -40,3 +40,7 @@ public void createOrder(Order order) {
     kafkaTemplate.send("order-created", order.getId());
 }
 
+Looks fine, right?
+
+But there is a small production problem.
+What if the database save succeeds but Kafka publishing fails?
