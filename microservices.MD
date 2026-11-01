@@ -27,3 +27,16 @@ Compensation can also fail, so retry and reconciliation are required.
 ---------------------------------------------------------------------------------------
 1. Why do we need the Outbox Pattern?
 
+Suppose Order Service has to do two things:
+
+Save the order in the database.
+Publish an OrderCreated event to Kafka.
+The simple code may look like this:
+
+JAVA
+Copy
+public void createOrder(Order order) {
+    orderRepository.save(order);
+    kafkaTemplate.send("order-created", order.getId());
+}
+
