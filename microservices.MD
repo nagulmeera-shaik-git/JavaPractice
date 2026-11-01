@@ -44,3 +44,10 @@ Looks fine, right?
 
 But there is a small production problem.
 What if the database save succeeds but Kafka publishing fails?
+
+Order DB       → SUCCESS
+Kafka          → FAILED
+
+Now the order is present in the database, but Payment/Inventory service never received the event.
+
+This is where the Outbox Pattern helps.
