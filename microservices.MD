@@ -58,3 +58,10 @@ Outbox Pattern is a way to reliably publish an event after a database transactio
 
 What is Outbox Pattern and why do we need it?
 Outbox is used when we need to update a database and publish an event reliably. If I directly save the order and then publish to Kafka, there is a failure window where the database commit can succeed but Kafka publishing can fail, so other services may never know about the order. With Outbox, I save the order and the event record in an Outbox table in the same local database transaction. A separate publisher reads the Outbox records and publishes them to Kafka. This gives us reliable eventual event publishing. It doesn't mean exactly-once delivery, so consumers should still handle duplicate events using idempotency.
+
+----------------------------------------------------------------------------------------
+
+What is idempotency and why is it important in microservices?
+Idempotency means that if the same business request is processed multiple times, it should not create multiple business effects. It's especially important in distributed systems because retries are common due to network timeouts and temporary failures. For example, in a payment API, the client may send a request, payment may succeed, but the response may be lost. The client then retries. We can use an idempotency key such as a payment request ID, store it with the payment and return the existing result when the same key comes again. I would also enforce uniqueness at the database level because a simple check-then-insert can have a race condition. For Kafka consumers, I would similarly use an event ID or business key to make duplicate message processing safe.
+
+--------------------------------------------------------------------------------------------
