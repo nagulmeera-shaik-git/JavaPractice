@@ -51,3 +51,5 @@ Kafka          → FAILED
 Now the order is present in the database, but Payment/Inventory service never received the event.
 
 This is where the Outbox Pattern helps.
+
+Outbox Pattern is a way to reliably publish an event after a database transaction by first saving the event in an Outbox table in the same database transaction as the business data.
