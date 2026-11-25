@@ -65,3 +65,14 @@ What is idempotency and why is it important in microservices?
 Idempotency means that if the same business request is processed multiple times, it should not create multiple business effects. It's especially important in distributed systems because retries are common due to network timeouts and temporary failures. For example, in a payment API, the client may send a request, payment may succeed, but the response may be lost. The client then retries. We can use an idempotency key such as a payment request ID, store it with the payment and return the existing result when the same key comes again. I would also enforce uniqueness at the database level because a simple check-then-insert can have a race condition. For Kafka consumers, I would similarly use an event ID or business key to make duplicate message processing safe.
 
 --------------------------------------------------------------------------------------------
+
+How do you dynamically update Spring Boot configuration without restarting the application?
+
+I would use Spring Cloud Config Server for centralized configuration management. All microservice configurations are maintained in a Git repository, and Config Server exposes them through REST APIs.
+Each Spring Boot microservice acts as a Config Client and fetches its configuration during startup.
+**For runtime updates, I use Spring Boot Actuator's refresh endpoint along with Spring Cloud Context's @RefreshScope.**
+When a refresh event is triggered, the Config Client reloads the latest configuration into Spring Environment. RefreshScope invalidates the cached target beans, and when those beans are accessed again, Spring recreates them using the updated configuration.
+
+For multiple microservice instances, I would integrate Spring Cloud Bus with RabbitMQ or Kafka to broadcast refresh events to all instances without restarting their JVMs.
+
+-------------------------------------------------------------------------------------------------
