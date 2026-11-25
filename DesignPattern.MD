@@ -35,8 +35,8 @@ Strategy	    Multiple interchangeable behaviours	            Payment/transaction
 Factory	        Centralised object/implementation selection	    Provider/type-based creation
 Builder	        Complex object construction	                    Request/configuration objects
 Adapter	        Incompatible interfaces	                        Third-party/legacy integration
-Template Method	Common workflow with variable steps	        Processing pipelines
-Decorator	    Add behaviour without changing original class	    Additional processing/features
+Template Method	Common workflow with variable steps	             Processing pipelines
+Decorator	    Add behaviour without changing original class	 Additional processing/features
 Proxy	    Control/intercept method invocation	Spring AOP,     transactions, security
 Observer	Notify interested components about events	        Application/domain events
 Facade	    Simplify access to complex subsystem	            Service/integration facade

@@ -182,7 +182,31 @@ Health checks
 Blue-Green deployment
 Canary deployment
 Rollback strategy
-BASH
-Copy
+
 kubectl rollout restart deployment payment-service
+
 Readiness probes ensure traffic goes only to healthy Pods.
+
+------------------------------------------------------------------------------
+
+1. Why Pods need stable networking
+
+Pods are ephemeral, so every time one is rescheduled, scaled, or replaced during a rollout, it gets a new IP. If a frontend hard-coded a backend Pod’s IP, it would break the moment that Pod restarted, and it would also have no way to spread traffic across multiple replicas. Clients need a single address that stays the same while the Pods behind it come and go. That’s what a Service provides: a fixed virtual IP and DNS name that always points to the current set of healthy Pods.
+
+2. How Services perform load balancing
+
+A Service uses a label selector to find its Pods. The control plane continuously tracks the IPs of matching Pods that pass their readiness probes and records them in EndpointSlice objects. On every node, kube-proxy watches those EndpointSlices and programs the kernel’s packet rules (iptables, IPVS, or nftables). When a Pod sends traffic to the Service’s virtual IP, those rules rewrite the destination to one of the backend Pod IPs. In iptables mode the backend is picked randomly; IPVS supports algorithms like round-robin and least-connections. This is layer 4 balancing per connection, not per HTTP request, so long-lived connections (like gRPC) can stick to one Pod. Setting sessionAffinity: ClientIP pins a client to the same Pod. Some CNI plugins, like Cilium, replace kube-proxy with eBPF but do the same job.
+
+3. How internal DNS works
+
+The cluster runs a DNS server, usually CoreDNS, as Pods behind a Service in kube-system. The kubelet configures every Pod’s /etc/resolv.conf to point at it, with search domains for the Pod’s namespace. CoreDNS watches the Kubernetes API and automatically creates records for every Service:
+
+<service>.<namespace>.svc.cluster.local  →  Service ClusterIP
+
+Because of the search domains, a Pod in the same namespace can just use my-service, while one in another namespace uses my-service.other-ns. Headless Services (clusterIP: None) return the individual Pod IPs instead of one virtual IP, which StatefulSets use to give each Pod a stable name like db-0.db.my-ns.svc.cluster.local.
+
+4. Difference between ClusterIP and LoadBalancer
+
+ClusterIP is the default type. It gives the Service a virtual IP reachable only from inside the cluster, which is right for internal traffic like an API talking to a database.
+
+LoadBalancer exposes the Service outside the cluster. Kubernetes asks the cloud provider (AWS, GCP, Azure) or a bare-metal implementation like MetalLB to provision an external load balancer with a public or private IP. It builds on the other types: a LoadBalancer Service also gets a ClusterIP and a NodePort, and the external load balancer forwards traffic to the nodes, where kube-proxy routes it to the Pods. Each LoadBalancer Service typically creates a separate cloud load balancer that costs money, so for many HTTP services teams usually expose one Ingress or Gateway controller via a LoadBalancer and route to ClusterIP Services behind it.
